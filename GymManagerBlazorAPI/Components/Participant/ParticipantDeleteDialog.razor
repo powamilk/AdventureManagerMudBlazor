@@ -1,0 +1,29 @@
+﻿@using AdventureManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject IParticipantService ParticipantService
+
+<MudDialog>
+    <DialogContent>
+        <p>Bạn có chắc muốn xóa người tham gia này?</p>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" OnClick="Delete">Xóa</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public int ParticipantId { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private async Task Delete()
+    {
+        await ParticipantService.DeleteParticipantAsync(ParticipantId);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

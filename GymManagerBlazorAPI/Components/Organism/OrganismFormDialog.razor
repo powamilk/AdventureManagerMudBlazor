@@ -1,0 +1,74 @@
+﻿@using AdventureManagement.API.ViewModel.OrganismViewModel
+@using AdventureManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IOrganismService OrganismService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="organismModel" Valid="isFormValid">
+            <MudTextField Label="Tên" @bind-Value="organismModel.Name" Required="true" />
+            <MudTextField Label="Mô tả" @bind-Value="organismModel.Description" />
+            <MudTextField Label="Môi trường sống" @bind-Value="organismModel.Habitat" Required="true" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Disabled="!isFormValid" Color="Color.Primary">Lưu</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public OrganismVM Organism { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private OrganismVM organismModel;
+    private bool isFormValid;
+
+    protected override void OnInitialized()
+    {
+        organismModel = Organism != null ? new OrganismVM
+            {
+                Id = Organism.Id,
+                Name = Organism.Name,
+                Description = Organism.Description,
+                Habitat = Organism.Habitat
+            } : new OrganismVM();
+    }
+
+    private async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (organismModel.Id == 0)
+            {
+                await OrganismService.CreateOrganismAsync(new CreateOrganismVM
+                    {
+                        Name = organismModel.Name,
+                        Description = organismModel.Description,
+                        Habitat = organismModel.Habitat
+                    });
+                Snackbar.Add("Đã thêm sinh vật mới", Severity.Success);
+            }
+            else
+            {
+                await OrganismService.UpdateOrganismAsync(organismModel.Id, new UpdateOrganismVM
+                    {
+                        Name = organismModel.Name,
+                        Description = organismModel.Description,
+                        Habitat = organismModel.Habitat
+                    });
+                Snackbar.Add("Đã cập nhật thông tin sinh vật", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

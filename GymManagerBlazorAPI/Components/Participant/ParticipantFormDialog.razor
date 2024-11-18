@@ -1,0 +1,70 @@
+﻿@using AdventureManagement.API.ViewModel.Participant
+@using AdventureManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IParticipantService ParticipantService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="participantModel" Valid="isFormValid">
+            <MudTextField Label="Tên" @bind-Value="participantModel.Name" Required="true" />
+            <MudTextField Label="Email" @bind-Value="participantModel.Email" Required="true" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Disabled="!isFormValid" Color="Color.Primary">Lưu</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public ParticipantVM Participant { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private ParticipantVM participantModel;
+    private bool isFormValid;
+
+    protected override void OnInitialized()
+    {
+        participantModel = Participant != null ? new ParticipantVM
+            {
+                Id = Participant.Id,
+                Name = Participant.Name,
+                Email = Participant.Email
+            } : new ParticipantVM();
+    }
+
+    private async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (participantModel.Id == 0)
+            {
+                await ParticipantService.CreateParticipantAsync(new ParticipantCreateVM
+                    {
+                        Name = participantModel.Name,
+                        Email = participantModel.Email
+                    });
+                Snackbar.Add("Đã thêm người tham gia mới", Severity.Success);
+            }
+            else
+            {
+                await ParticipantService.UpdateParticipantAsync(participantModel.Id, new ParticipantUpdateVM
+                    {
+                        Name = participantModel.Name,
+                        Email = participantModel.Email
+                    });
+                Snackbar.Add("Đã cập nhật thông tin người tham gia", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

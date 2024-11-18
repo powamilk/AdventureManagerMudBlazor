@@ -1,0 +1,29 @@
+﻿@using AdventureManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject IOrganismService OrganismService
+
+<MudDialog>
+    <DialogContent>
+        <p>Bạn có chắc muốn xóa sinh vật này?</p>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Error" OnClick="Delete">Xóa</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public int OrganismId { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private async Task Delete()
+    {
+        await OrganismService.DeleteOrganismAsync(OrganismId);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

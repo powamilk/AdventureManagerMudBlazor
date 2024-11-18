@@ -1,0 +1,83 @@
+﻿@page "/guides"
+@using AdventureManagement.API.ViewModel.GuideViewModel
+@using GymManagerBlazorAPI.Services.Interface
+@using MudBlazor
+@inject IGuideService GuideService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Quản lý Hướng Dẫn Viên</PageTitle>
+
+<h3>Quản lý Hướng Dẫn Viên</h3>
+
+<MudTable Items="guides" Hover="true" Bordered="true" Striped="true">
+    <ToolBarContent>
+        <MudButton Color="Color.Primary" OnClick="async () => await AddGuide()">Thêm Hướng Dẫn Viên</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Tên</MudTh>
+        <MudTh>Chuyên môn</MudTh>
+        <MudTh>Kinh nghiệm (năm)</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id</MudTd>
+        <MudTd DataLabel="Tên">@context.Name</MudTd>
+        <MudTd DataLabel="Chuyên môn">@context.Expertise</MudTd>
+        <MudTd DataLabel="Kinh nghiệm">@context.ExperienceYears</MudTd>
+        <MudTd DataLabel="Thao tác">
+            <MudButton Color="Color.Secondary" OnClick="async () => await EditGuide(context)">Sửa</MudButton>
+            <MudButton Color="Color.Error" OnClick="async () => await DeleteGuide(context.Id)">Xóa</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<GuideVM> guides;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGuides();
+    }
+
+    private async Task LoadGuides()
+    {
+        guides = await GuideService.GetAllGuidesAsync();
+    }
+
+    private async Task AddGuide()
+    {
+        var dialog = DialogService.Show<GuideFormDialog>("Thêm Hướng Dẫn Viên Mới");
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadGuides();
+            Snackbar.Add("Đã thêm hướng dẫn viên mới", Severity.Success);
+        }
+    }
+
+    private async Task EditGuide(GuideVM guide)
+    {
+        var parameters = new DialogParameters { ["Guide"] = guide };
+        var dialog = DialogService.Show<GuideFormDialog>("Sửa Hướng Dẫn Viên", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadGuides();
+            Snackbar.Add("Đã cập nhật thông tin hướng dẫn viên", Severity.Success);
+        }
+    }
+
+    private async Task DeleteGuide(int guideId)
+    {
+        bool? confirmed = await DialogService.ShowMessageBox("Xác nhận", "Bạn có chắc muốn xóa hướng dẫn viên này?",
+                                                             yesText: "Xóa", noText: "Hủy");
+        if (confirmed == true)
+        {
+            await GuideService.DeleteGuideAsync(guideId);
+            await LoadGuides();
+            Snackbar.Add("Đã xóa hướng dẫn viên", Severity.Success);
+        }
+    }
+}

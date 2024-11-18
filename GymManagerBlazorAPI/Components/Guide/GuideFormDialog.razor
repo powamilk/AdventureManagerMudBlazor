@@ -1,0 +1,75 @@
+﻿@using AdventureManagement.API.ViewModel.GuideViewModel
+@using GymManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IGuideService GuideService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="guideModel" Valid="isFormValid">
+            <MudTextField Label="Tên" @bind-Value="guideModel.Name" Required="true" />
+            <MudTextField Label="Chuyên môn" @bind-Value="guideModel.Expertise" Required="true" />
+            <MudNumericField Label="Kinh nghiệm (năm)" @bind-Value="guideModel.ExperienceYears" Required="true" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Disabled="!isFormValid" Color="Color.Primary">Lưu</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public GuideVM Guide { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private GuideVM guideModel;
+    private bool isFormValid;
+
+    protected override void OnInitialized()
+    {
+        // Clone hoặc tạo mới model
+        guideModel = Guide != null ? new GuideVM
+            {
+                Id = Guide.Id,
+                Name = Guide.Name,
+                Expertise = Guide.Expertise,
+                ExperienceYears = Guide.ExperienceYears
+            } : new GuideVM();
+    }
+
+    private async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (guideModel.Id == 0)
+            {
+                await GuideService.CreateGuideAsync(new CreateGuideVM
+                    {
+                        Name = guideModel.Name,
+                        Expertise = guideModel.Expertise,
+                        ExperienceYears = guideModel.ExperienceYears
+                    });
+                Snackbar.Add("Đã thêm hướng dẫn viên mới", Severity.Success);
+            }
+            else
+            {
+                await GuideService.UpdateGuideAsync(guideModel.Id, new UpdateGuideVM
+                    {
+                        Name = guideModel.Name,
+                        Expertise = guideModel.Expertise,
+                        ExperienceYears = guideModel.ExperienceYears
+                    });
+                Snackbar.Add("Đã cập nhật thông tin hướng dẫn viên", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

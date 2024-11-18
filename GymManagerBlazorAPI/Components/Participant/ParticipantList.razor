@@ -1,0 +1,83 @@
+﻿@page "/participants"
+@using AdventureManagement.API.ViewModel.Participant
+@using AdventureManagerBlazorAPI.Serivces.Interface
+@using MudBlazor
+@inject IParticipantService ParticipantService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Quản lý Người Tham Gia</PageTitle>
+
+<h3>Quản lý Người Tham Gia</h3>
+
+<MudTable Items="participants" Hover="true" Bordered="true" Striped="true">
+    <ToolBarContent>
+        <MudButton Color="Color.Primary" OnClick="async () => await AddParticipant()">Thêm Người Tham Gia</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Tên</MudTh>
+        <MudTh>Email</MudTh>
+        <MudTh>Ngày Tạo</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id</MudTd>
+        <MudTd DataLabel="Tên">@context.Name</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+        <MudTd DataLabel="Ngày Tạo">@context.CreatedAt?.ToString("yyyy-MM-dd")</MudTd>
+        <MudTd DataLabel="Thao tác">
+            <MudButton Color="Color.Secondary" OnClick="async () => await EditParticipant(context)">Sửa</MudButton>
+            <MudButton Color="Color.Error" OnClick="async () => await DeleteParticipant(context.Id)">Xóa</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<ParticipantVM> participants;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadParticipants();
+    }
+
+    private async Task LoadParticipants()
+    {
+        participants = await ParticipantService.GetAllParticipantsAsync();
+    }
+
+    private async Task AddParticipant()
+    {
+        var dialog = DialogService.Show<ParticipantFormDialog>("Thêm Người Tham Gia Mới");
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadParticipants();
+            Snackbar.Add("Đã thêm người tham gia mới", Severity.Success);
+        }
+    }
+
+    private async Task EditParticipant(ParticipantVM participant)
+    {
+        var parameters = new DialogParameters { ["Participant"] = participant };
+        var dialog = DialogService.Show<ParticipantFormDialog>("Sửa Người Tham Gia", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadParticipants();
+            Snackbar.Add("Đã cập nhật thông tin người tham gia", Severity.Success);
+        }
+    }
+
+    private async Task DeleteParticipant(int participantId)
+    {
+        var parameters = new DialogParameters { ["ParticipantId"] = participantId };
+        var dialog = DialogService.Show<ParticipantDeleteDialog>("Xóa Người Tham Gia", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadParticipants();
+            Snackbar.Add("Đã xóa người tham gia", Severity.Success);
+        }
+    }
+}

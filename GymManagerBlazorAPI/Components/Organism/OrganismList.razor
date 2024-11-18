@@ -1,0 +1,83 @@
+﻿@page "/organisms"
+@using AdventureManagement.API.ViewModel.OrganismViewModel
+@using GymManagerBlazorAPI.Services.Interface
+@using MudBlazor
+@inject IOrganismService OrganismService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Quản lý Sinh Vật</PageTitle>
+
+<h3>Quản lý Sinh Vật</h3>
+
+<MudTable Items="organisms" Hover="true" Bordered="true" Striped="true">
+    <ToolBarContent>
+        <MudButton Color="Color.Primary" OnClick="async () => await AddOrganism()">Thêm Sinh Vật</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Tên</MudTh>
+        <MudTh>Mô tả</MudTh>
+        <MudTh>Môi trường sống</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id</MudTd>
+        <MudTd DataLabel="Tên">@context.Name</MudTd>
+        <MudTd DataLabel="Mô tả">@context.Description</MudTd>
+        <MudTd DataLabel="Môi trường sống">@context.Habitat</MudTd>
+        <MudTd DataLabel="Thao tác">
+            <MudButton Color="Color.Secondary" OnClick="async () => await EditOrganism(context)">Sửa</MudButton>
+            <MudButton Color="Color.Error" OnClick="async () => await DeleteOrganism(context.Id)">Xóa</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<OrganismVM> organisms;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrganisms();
+    }
+
+    private async Task LoadOrganisms()
+    {
+        organisms = await OrganismService.GetAllOrganismsAsync();
+    }
+
+    private async Task AddOrganism()
+    {
+        var dialog = DialogService.Show<OrganismFormDialog>("Thêm Sinh Vật Mới");
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadOrganisms();
+            Snackbar.Add("Đã thêm sinh vật mới", Severity.Success);
+        }
+    }
+
+    private async Task EditOrganism(OrganismVM organism)
+    {
+        var parameters = new DialogParameters { ["Organism"] = organism };
+        var dialog = DialogService.Show<OrganismFormDialog>("Sửa Sinh Vật", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadOrganisms();
+            Snackbar.Add("Đã cập nhật thông tin sinh vật", Severity.Success);
+        }
+    }
+
+    private async Task DeleteOrganism(int organismId)
+    {
+        var parameters = new DialogParameters { ["OrganismId"] = organismId };
+        var dialog = DialogService.Show<OrganismDeleteDialog>("Xóa Sinh Vật", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadOrganisms();
+            Snackbar.Add("Đã xóa sinh vật", Severity.Success);
+        }
+    }
+}
