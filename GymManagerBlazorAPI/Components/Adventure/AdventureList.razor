@@ -1,0 +1,85 @@
+﻿@page "/adventures"
+@using AdventureBUS.Serivces.Interface
+@using AdventureBUS.ViewModel.AdventureViewModel
+@using MudBlazor
+@inject IAdventureService AdventureService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Quản lý Chuyến Phiêu Lưu</PageTitle>
+
+<h3>Quản lý Chuyến Phiêu Lưu</h3>
+
+<MudTable Items="adventures" Hover="true" Bordered="true" Striped="true">
+    <ToolBarContent>
+        <MudButton Color="Color.Primary" OnClick="async () => await AddAdventure()">Thêm Chuyến Phiêu Lưu</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Tiêu đề</MudTh>
+        <MudTh>Mô tả</MudTh>
+        <MudTh>Địa điểm</MudTh>
+        <MudTh>Thời lượng</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id</MudTd>
+        <MudTd DataLabel="Tiêu đề">@context.Title</MudTd>
+        <MudTd DataLabel="Mô tả">@context.Description</MudTd>
+        <MudTd DataLabel="Địa điểm">@context.Location</MudTd>
+        <MudTd DataLabel="Thời lượng">@context.Duration</MudTd>
+        <MudTd DataLabel="Thao tác">
+            <MudButton Color="Color.Secondary" OnClick="async () => await EditAdventure(context)">Sửa</MudButton>
+            <MudButton Color="Color.Error" OnClick="async () => await DeleteAdventure(context.Id)">Xóa</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<AdventureVM> adventures;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAdventures();
+    }
+
+    private async Task LoadAdventures()
+    {
+        adventures = await AdventureService.GetAllAdventuresAsync();
+    }
+
+    private async Task AddAdventure()
+    {
+        var dialog = DialogService.Show<AdventureFormDialog>("Thêm Chuyến Phiêu Lưu Mới");
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadAdventures();
+            Snackbar.Add("Đã thêm chuyến phiêu lưu mới", Severity.Success);
+        }
+    }
+
+    private async Task EditAdventure(AdventureVM adventure)
+    {
+        var parameters = new DialogParameters { ["Adventure"] = adventure };
+        var dialog = DialogService.Show<AdventureFormDialog>("Sửa Chuyến Phiêu Lưu", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadAdventures();
+            Snackbar.Add("Đã cập nhật chuyến phiêu lưu", Severity.Success);
+        }
+    }
+
+    private async Task DeleteAdventure(int adventureId)
+    {
+        var parameters = new DialogParameters { ["AdventureId"] = adventureId };
+        var dialog = DialogService.Show<AdventureDeleteDialog>("Xóa Chuyến Phiêu Lưu", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadAdventures();
+            Snackbar.Add("Đã xóa chuyến phiêu lưu", Severity.Success);
+        }
+    }
+}

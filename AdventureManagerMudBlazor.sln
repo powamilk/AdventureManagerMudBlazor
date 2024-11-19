@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureManagerBlazorAPI", "GymManagerBlazorAPI\AdventureManagerBlazorAPI.csproj", "{D3846DC2-6CBD-4D7A-ACED-37D1024DC9F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureBUS", "AdventureBUS\AdventureBUS.csproj", "{8AB2F38E-83EB-4831-91B0-BECC812EA1B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdventureDAL", "AdventureDAL\AdventureDAL.csproj", "{3CF6D4D7-BD77-412D-9E3E-033932B44912}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{D3846DC2-6CBD-4D7A-ACED-37D1024DC9F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3846DC2-6CBD-4D7A-ACED-37D1024DC9F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3846DC2-6CBD-4D7A-ACED-37D1024DC9F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AB2F38E-83EB-4831-91B0-BECC812EA1B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AB2F38E-83EB-4831-91B0-BECC812EA1B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AB2F38E-83EB-4831-91B0-BECC812EA1B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AB2F38E-83EB-4831-91B0-BECC812EA1B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CF6D4D7-BD77-412D-9E3E-033932B44912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CF6D4D7-BD77-412D-9E3E-033932B44912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CF6D4D7-BD77-412D-9E3E-033932B44912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CF6D4D7-BD77-412D-9E3E-033932B44912}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

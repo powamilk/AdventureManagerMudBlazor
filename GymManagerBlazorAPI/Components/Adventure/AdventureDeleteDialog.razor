@@ -1,10 +1,10 @@
 ﻿@using AdventureBUS.Serivces.Interface
 @using MudBlazor
-@inject IParticipantService ParticipantService
+@inject IAdventureService AdventureService
 
 <MudDialog>
     <DialogContent>
-        <p>Bạn có chắc muốn xóa người tham gia này?</p>
+        <p>Bạn có chắc muốn xóa chuyến phiêu lưu này?</p>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Error" OnClick="Delete">Xóa</MudButton>
@@ -13,12 +13,12 @@
 </MudDialog>
 
 @code {
-    [Parameter] public int ParticipantId { get; set; }
+    [Parameter] public int AdventureId { get; set; }
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
     private async Task Delete()
     {
-        await ParticipantService.DeleteParticipantAsync(ParticipantId);
+        await AdventureService.DeleteAdventureAsync(AdventureId);
         MudDialog.Close(DialogResult.Ok(true));
     }
 

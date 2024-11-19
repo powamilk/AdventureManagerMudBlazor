@@ -1,0 +1,101 @@
+﻿@using AdventureBUS.Serivces.Interface
+@using AdventureBUS.ViewModel.AdventureViewModel
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IAdventureService AdventureService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="adventureModel" Valid="isFormValid">
+            <MudTextField Label="Tiêu đề" @bind-Value="adventureModel.Title" Required="true" />
+            <MudTextField Label="Mô tả" @bind-Value="adventureModel.Description" Required="true" />
+            <MudTextField Label="Địa điểm" @bind-Value="adventureModel.Location" Required="true" />
+            <MudNumericField Label="Thời lượng" @bind-Value="adventureModel.Duration" Min="1" Required="true" />
+            <MudNumericField Label="ID Hướng Dẫn Viên" @bind-Value="adventureModel.GuideId" />
+            <MudChipSet MultiSelection="true">
+                <MudChip @bind-IsSelected="adventureModel.OrganismIds.Contains(1)" OnClick="() => ToggleOrganismId(1)">Organism 1</MudChip>
+                <MudChip @bind-IsSelected="adventureModel.OrganismIds.Contains(2)" OnClick="() => ToggleOrganismId(2)">Organism 2</MudChip>
+            </MudChipSet>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Disabled="!isFormValid" Color="Color.Primary">Lưu</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public AdventureVM Adventure { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private AdventureVM adventureModel;
+    private bool isFormValid;
+
+    protected override void OnInitialized()
+    {
+        adventureModel = Adventure != null ? new AdventureVM
+        {
+            Id = Adventure.Id,
+            Title = Adventure.Title,
+            Description = Adventure.Description,
+            Location = Adventure.Location,
+            Duration = Adventure.Duration,
+            GuideId = Adventure.Guide?.Id ?? 0,
+            OrganismIds = Adventure.Organisms?.Select(o => o.Id).ToList() ?? new List<int>()
+        } : new AdventureVM();
+    }
+
+    private async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (adventureModel.Id == 0)
+            {
+                await AdventureService.CreateAdventureAsync(new CreateAdventureVM
+                {
+                    Title = adventureModel.Title,
+                    Description = adventureModel.Description,
+                    Location = adventureModel.Location,
+                    Duration = adventureModel.Duration,
+                    GuideId = adventureModel.GuideId,
+                    OrganismIds = adventureModel.OrganismIds
+                });
+                Snackbar.Add("Đã thêm chuyến phiêu lưu mới", Severity.Success);
+            }
+            else
+            {
+                await AdventureService.UpdateAdventureAsync(adventureModel.Id, new UpdateAdventureVM
+                {
+                    Title = adventureModel.Title,
+                    Description = adventureModel.Description,
+                    Location = adventureModel.Location,
+                    Duration = adventureModel.Duration,
+                    GuideId = adventureModel.GuideId,
+                    OrganismIds = adventureModel.OrganismIds
+                });
+                Snackbar.Add("Đã cập nhật chuyến phiêu lưu", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void ToggleOrganismId(int organismId)
+    {
+        if (adventureModel.OrganismIds.Contains(organismId))
+        {
+            adventureModel.OrganismIds.Remove(organismId);
+        }
+        else
+        {
+            adventureModel.OrganismIds.Add(organismId);
+        }
+    }
+}

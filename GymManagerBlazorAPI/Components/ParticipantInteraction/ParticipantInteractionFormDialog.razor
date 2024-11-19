@@ -1,0 +1,76 @@
+﻿@using AdventureBUS.Serivces.Interface
+@using AdventureBUS.ViewModel.ParticipantInteraction
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IParticipantInteractionService ParticipantInteractionService
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="form" Model="interactionModel" Valid="isFormValid">
+            <MudNumericField Label="Chuyến Phiêu Lưu ID" @bind-Value="interactionModel.AdventureId" Required="true" />
+            <MudNumericField Label="Người Tham Gia ID" @bind-Value="interactionModel.ParticipantId" Required="true" />
+            <MudNumericField Label="Đánh Giá" @bind-Value="interactionModel.Rating" Min="1" Max="5" Required="true" />
+            <MudTextField Label="Bình Luận" @bind-Value="interactionModel.Comment" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Disabled="!isFormValid" Color="Color.Primary">Lưu</MudButton>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public ParticipantInteractionVM Interaction { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private MudForm form;
+    private ParticipantInteractionVM interactionModel;
+    private bool isFormValid;
+
+    protected override void OnInitialized()
+    {
+        interactionModel = Interaction != null ? new ParticipantInteractionVM
+            {
+                Id = Interaction.Id,
+                AdventureId = Interaction.AdventureId,
+                ParticipantId = Interaction.ParticipantId,
+                Rating = Interaction.Rating,
+                Comment = Interaction.Comment
+            } : new ParticipantInteractionVM();
+    }
+
+    private async Task Save()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (interactionModel.Id == 0)
+            {
+                await ParticipantInteractionService.CreateInteractionAsync(new CreateParticipantInteractionVM
+                    {
+                        AdventureId = interactionModel.AdventureId,
+                        ParticipantId = interactionModel.ParticipantId,
+                        Rating = interactionModel.Rating,
+                        Comment = interactionModel.Comment
+                    });
+                Snackbar.Add("Đã thêm tương tác mới", Severity.Success);
+            }
+            else
+            {
+                await ParticipantInteractionService.UpdateInteractionAsync(interactionModel.Id, new UpdateParticipantInteractionVM
+                    {
+                        Rating = interactionModel.Rating,
+                        Comment = interactionModel.Comment
+                    });
+                Snackbar.Add("Đã cập nhật tương tác", Severity.Success);
+            }
+
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

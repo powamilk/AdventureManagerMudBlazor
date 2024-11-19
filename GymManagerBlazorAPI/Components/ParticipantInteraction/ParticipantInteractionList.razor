@@ -1,0 +1,85 @@
+﻿@page "/participant-interactions"
+@using AdventureBUS.Serivces.Interface
+@using AdventureBUS.ViewModel.ParticipantInteraction
+@using MudBlazor
+@inject IParticipantInteractionService ParticipantInteractionService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Quản lý Tương Tác</PageTitle>
+
+<h3>Quản lý Tương Tác</h3>
+
+<MudTable Items="interactions" Hover="true" Bordered="true" Striped="true">
+    <ToolBarContent>
+        <MudButton Color="Color.Primary" OnClick="async () => await AddInteraction()">Thêm Tương Tác</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>ID</MudTh>
+        <MudTh>Chuyến Phiêu Lưu</MudTh>
+        <MudTh>Người Tham Gia</MudTh>
+        <MudTh>Đánh Giá</MudTh>
+        <MudTh>Bình Luận</MudTh>
+        <MudTh>Thao tác</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="ID">@context.Id</MudTd>
+        <MudTd DataLabel="Chuyến Phiêu Lưu">@context.AdventureTitle</MudTd>
+        <MudTd DataLabel="Người Tham Gia">@context.ParticipantName</MudTd>
+        <MudTd DataLabel="Đánh Giá">@context.Rating</MudTd>
+        <MudTd DataLabel="Bình Luận">@context.Comment</MudTd>
+        <MudTd DataLabel="Thao tác">
+            <MudButton Color="Color.Secondary" OnClick="async () => await EditInteraction(context)">Sửa</MudButton>
+            <MudButton Color="Color.Error" OnClick="async () => await DeleteInteraction(context.Id)">Xóa</MudButton>
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+@code {
+    private List<ParticipantInteractionVM> interactions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadInteractions();
+    }
+
+    private async Task LoadInteractions()
+    {
+        interactions = await ParticipantInteractionService.GetAllInteractionsAsync();
+    }
+
+    private async Task AddInteraction()
+    {
+        var dialog = DialogService.Show<ParticipantInteractionFormDialog>("Thêm Tương Tác Mới");
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadInteractions();
+            Snackbar.Add("Đã thêm tương tác mới", Severity.Success);
+        }
+    }
+
+    private async Task EditInteraction(ParticipantInteractionVM interaction)
+    {
+        var parameters = new DialogParameters { ["Interaction"] = interaction };
+        var dialog = DialogService.Show<ParticipantInteractionFormDialog>("Sửa Tương Tác", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadInteractions();
+            Snackbar.Add("Đã cập nhật tương tác", Severity.Success);
+        }
+    }
+
+    private async Task DeleteInteraction(int interactionId)
+    {
+        var parameters = new DialogParameters { ["InteractionId"] = interactionId };
+        var dialog = DialogService.Show<ParticipantInteractionDeleteDialog>("Xóa Tương Tác", parameters);
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await LoadInteractions();
+            Snackbar.Add("Đã xóa tương tác", Severity.Success);
+        }
+    }
+}

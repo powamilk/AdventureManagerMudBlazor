@@ -1,19 +1,29 @@
 ﻿@inherits LayoutComponentBase
-@* Required *@
+
 <MudThemeProvider />
 <MudPopoverProvider />
-<div class="page">
-    <div class="sidebar">
+
+<MudLayout>
+    <!-- Sidebar -->
+    <MudDrawer Elevation="1" Open="true" Variant="DrawerVariant.Mini" Class="mud-theme-secondary">
         <NavMenu />
-    </div>
+    </MudDrawer>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+    <!-- Main Content -->
+    <MudMainContent>
+        <!-- Header -->
+        <MudAppBar Position="AppBarPosition.Top" Elevation="1" Color="Color.Primary">
+            <MudText Typo="Typo.h6" Class="pl-4">GymManagerBlazorAPI</MudText>
+            <MudSpacer />
+            <MudButton Target="_blank" Href="https://learn.microsoft.com/aspnet/core/" Color="Color.Inherit">
+                About
+            </MudButton>
+        </MudAppBar>
 
-        <article class="content px-4">
+        <!-- Content Body -->
+        <div class="content px-4">
             @Body
-        </article>
-    </main>
-</div>
+        </div>
+    </MudMainContent>
+</MudLayout>
+
